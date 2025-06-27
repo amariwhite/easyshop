@@ -1,8 +1,6 @@
 package org.yearup.data.mysql;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
 
@@ -11,126 +9,134 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
-public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
-
-    @Autowired
-    public MySqlCategoryDao(DataSource dataSource){
+@Component
+public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
+{
+    public MySqlCategoryDao(DataSource dataSource)
+    {
         super(dataSource);
     }
 
     @Override
-    public void addItem(int userId, int productId, int quantity) {
-
-    }
-
-    @Override
-    public void clearCart(int userId) {
-
-    }
-
-    @Override
-    public List<Category> getAll() {
+    public List<Category> getAllCategories()
+    {
+        // get all categories
         List<Category> categories = new ArrayList<>();
-        String sql = "SELECT * FROM categories";
+        String sql = "SELECT category_id, name, description FROM categories ";
+        try(Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet row = statement.executeQuery();
 
-        try (Connection conn = getDataSource().getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                categories.add(mapRow(rs));
+            while (row.next()){
+                Category category = mapRow(row);
+                categories.add(category);
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch (SQLException e){
+            System.err.println("Error in getAllCategories: " + e.getMessage());
+            throw new RuntimeException(e);
         }
-
         return categories;
     }
 
     @Override
-    public Category getById(int id) {
-        String sql = "SELECT * FROM categories WHERE category_id = ?";
+    public Category getById(int categoryId){
+        // get category by id
+        String sql = "SELECT category_id, name, description From categories WHERE category_id = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, categoryId);
 
-        try (Connection conn = getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet row = statement.executeQuery();
 
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapRow(rs);
+            if (row.next()){
+                return mapRow(row);
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch (SQLException e){
+            System.err.println("Error in getById for categoryId " + categoryId + ": " + e.getMessage());
+            throw new RuntimeException(e);
         }
-
         return null;
     }
 
     @Override
-    public Category create(Category category) {
+    public Category create(Category category)
+    {
+        // create a new category
         String sql = "INSERT INTO categories (name, description) VALUES (?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, category.getName());
+            statement.setString(2, category.getDescription());
 
-        try (Connection conn = getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, category.getName());
-            stmt.setString(2, category.getDescription());
-            stmt.executeUpdate();
-
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                category.setCategoryId(keys.getInt(1));
+            int rowAffected = statement.executeUpdate();
+            if (rowAffected > 0){
+                ResultSet row = statement.getGeneratedKeys();
+                if (row.next()){
+                    int newCategoryId = row.getInt(1);
+                    return getById(newCategoryId);
+                }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Category creation failed, no ID obtained.");
+        }catch (SQLException e){
+            System.err.println("Error in create category: " + e.getMessage());
+            throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void update(int categoryId, Category category)
+    {
+        // update category
+        String sql = "UPDATE categories SET name = ?, description = ? WHERE category_id = ? ";
+        try(Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, category.getName());
+            statement.setString(2, category.getDescription());
+            statement.setInt(3, categoryId); // Using the ID from the path
+
+            int rowAffected = statement.executeUpdate();
+            if (rowAffected == 0){
+                System.out.println("No category of type " + categoryId + " found");
+            }
+        }catch (SQLException e){
+            System.err.println("Error in update categoryId " + categoryId + ": " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void delete(int categoryId)
+    {
+        // delete category
+        String sql = "DELETE FROM categories WHERE category_id = ? ";
+        try(Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, categoryId); // Using the ID from the path
+
+            int rowAffected = statement.executeUpdate();
+            if (rowAffected == 0){
+                System.out.println("No category of type " + categoryId + " found");
+            }
+        }catch (SQLException e){
+            System.err.println("Error in update categoryId " + categoryId + ": " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Category mapRow(ResultSet row) throws SQLException
+    {
+        int categoryId = row.getInt("category_id");
+        String name = row.getString("name");
+        String description = row.getString("description");
+
+        Category category = new Category()
+        {{
+            setCategoryId(categoryId);
+            setName(name);
+            setDescription(description);
+        }};
 
         return category;
     }
 
-    @Override
-    public void update(Category category) {
-        String sql = "UPDATE categories SET name = ?, description = ? WHERE category_id = ?";
-
-        try (Connection conn = getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, category.getName());
-            stmt.setString(2, category.getDescription());
-            stmt.setInt(3, category.getCategoryId());
-
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void delete(int id) {
-        String sql = "DELETE FROM categories WHERE category_id = ?";
-
-        try (Connection conn = getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Category mapRow(ResultSet rs) throws SQLException {
-        return new Category(
-                rs.getInt("category_id"),
-                rs.getString("name"),
-                rs.getString("description")
-        );
-    }
 }

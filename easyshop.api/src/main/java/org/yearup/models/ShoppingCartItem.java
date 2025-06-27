@@ -1,56 +1,60 @@
 package org.yearup.models;
-//
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
 
-public class ShoppingCartItem {
+public class ShoppingCartItem
+{
+    private Product product = null;
+    private int quantity = 1;
+    private BigDecimal discountPercent = BigDecimal.ZERO;
 
-    private Product product;
-    private int quantity;
-    private int discountPercent = 0;
 
-    public ShoppingCartItem(Product product, int quantity){
-        this.product = product;
-        this.quantity = quantity;
-    }
-
-    public ShoppingCartItem() {
-
-    }
-
-    public Product getProduct() {
+    public Product getProduct()
+    {
         return product;
     }
 
-    public void setProduct(Product product) {
+    public void setProduct(Product product)
+    {
         this.product = product;
     }
 
-    public int getQuantity() {
+    public int getQuantity()
+    {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(int quantity)
+    {
         this.quantity = quantity;
     }
 
-    public int getDiscountPercent() {
+    public BigDecimal getDiscountPercent()
+    {
         return discountPercent;
     }
 
-    public void setDiscountPercent(int discountPercent) {
+    public void setDiscountPercent(BigDecimal discountPercent)
+    {
         this.discountPercent = discountPercent;
+    }
+
+    @JsonIgnore
+    public int getProductId()
+    {
+        return this.product.getProductId();
     }
 
     public BigDecimal getLineTotal()
     {
-        if (product == null || product.getPrice() == null)
-            return BigDecimal.ZERO;
+        BigDecimal basePrice = product.getPrice();
+        BigDecimal quantity = new BigDecimal(this.quantity);
 
-        BigDecimal total = product.getPrice().multiply(BigDecimal.valueOf(quantity));
-        BigDecimal discount = total.multiply(BigDecimal.valueOf(discountPercent)).divide(BigDecimal.valueOf(100));
-        return total.subtract(discount);
-    }
+        BigDecimal subTotal = basePrice.multiply(quantity);
+        BigDecimal discountAmount = subTotal.multiply(discountPercent);
 
-    public void setDiscountPercent(BigDecimal zero) {
+        return subTotal.subtract(discountAmount);
     }
 }

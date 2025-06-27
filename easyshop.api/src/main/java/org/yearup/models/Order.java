@@ -1,47 +1,122 @@
 package org.yearup.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public class Order {
     private int orderId;
     private int userId;
-    private LocalDateTime date;
+    private LocalDate orderDate;
     private String address;
     private String city;
-    private String state;
+    private String  state;
     private String zip;
-    private BigDecimal shippingAmount;
-    private List<OrderLineItem> lineItems;
+    private BigDecimal shopping_amount;
 
-    public Order() {}
+    private List<OrderLineItem> Items;
 
-    // Getters and Setters
-    public int getOrderId() { return orderId; }
-    public void setOrderId(int orderId) { this.orderId = orderId; }
+    public Order() {
+    }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public Order(LocalDate orderDate) {
+        this.orderDate = orderDate;
+    }
 
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
+    public Order(int orderId, int userId, LocalDate orderDate, String address, String city, String state, String zip, BigDecimal shopping_amount) {
+        this.orderId = orderId;
+        this.userId = userId;
+        this.orderDate = orderDate;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.shopping_amount = shopping_amount;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public List<OrderLineItem> getItems() {
+        return Items;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setItems(List<OrderLineItem> items) {
+        Items = items;
+    }
 
-    public String getState() { return state; }
-    public void setState(String state) { this.state = state; }
+    public int getOrderId() {
+        return orderId;
+    }
 
-    public String getZip() { return zip; }
-    public void setZip(String zip) { this.zip = zip; }
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
 
-    public BigDecimal getShippingAmount() { return shippingAmount; }
-    public void setShippingAmount(BigDecimal shippingAmount) { this.shippingAmount = shippingAmount; }
+    public int getUserId() {
+        return userId;
+    }
 
-    public List<OrderLineItem> getLineItems() { return lineItems; }
-    public void setLineItems(List<OrderLineItem> lineItems) { this.lineItems = lineItems; }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public LocalDate getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDate orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
+
+    public BigDecimal getShopping_amount() {
+        return shopping_amount;
+    }
+
+    public void setShopping_amount(BigDecimal shopping_amount) {
+        this.shopping_amount = shopping_amount;
+    }
+
+    @Override
+    public String toString() {
+        return "Orders{" +
+                "orderId=" + orderId +
+                ", userId=" + userId +
+                ", orderDate=" + orderDate +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", shopping_amount=" + shopping_amount +
+                '}';
+    }
 }

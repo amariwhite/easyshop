@@ -17,11 +17,4 @@ public abstract class MySqlDaoBase
     {
         return dataSource.getConnection();
     }
-    protected DataSource getDataSource (){
-        return dataSource;
-    }
-
-    public abstract void addItem(int userId, int productId, int quantity);
-
-    public abstract void clearCart(int userId);
 }
