@@ -122,4 +122,8 @@ public class User {
 
       return "ROLE_USER";
    }
+
+    public Order getProfile() {
+        return null;
+    }
 }
